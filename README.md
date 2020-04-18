@@ -1,6 +1,10 @@
 # sc2_analytics
 Building better data structures and analytical modules to help StarCraft Players analyze their replays and focus improvement
 
+python library dependencies:
+  sc2reader
+  sqlalchemy
+
 
 Scripts require an inital yaml configuration file (thus far called US_Excelle.yml) directing the script to where the replays are stored on your filestructure.
 
