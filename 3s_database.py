@@ -8,9 +8,9 @@ engine = create_engine('sqlite:///test.db', echo=True)
 metadata = MetaData()
 Base = declarative_base()
 
-player_team = Table('association', Base.metadata,
-    Column('left_id', Integer, ForeignKey('left.id')),
-    Column('right_id', Integer, ForeignKey('right.id')))
+player_team = Table('player_team', Base.metadata,
+    Column('player_id', Integer, ForeignKey('player.id')),
+    Column('team_id', Integer, ForeignKey('team.id')))
 
 class Player(Base):
     __tablename__ = 'player'
@@ -31,11 +31,11 @@ class Stat_Type(Base):
 class Stat(Base):
     __tablename__ = 'stat'
     id = Column(Integer, primary_key=True)
-    stat_type_id = Column("Integer", ForeignKey("stat_type.id"))
+    stat_type_id = Column(Integer, ForeignKey("stat_type.id"))
     stat_type = relationship("Stat_Type", backref="stats")
-    player_id = Column("Integer", ForeignKey("player.id"))
+    player_id = Column(Integer, ForeignKey("player.id"))
     player = relationship("Player", backref="stats")
-    replay_id = Column("Integer", ForeignKey("replay.id"))
+    replay_id = Column(String, ForeignKey("replay.replay_hash"))
     replay = relationship("Replay", backref="stats")
     value = Column(String)
 
@@ -47,9 +47,9 @@ class Replay(Base):
 class Team(Base):
     __tablename__ = 'team'
     id = Column(Integer, primary_key=True)
-    replay_id = Column("Integer", ForeignKey("replay.id"))
+    replay_id = Column(String, ForeignKey("replay.replay_hash"))
     replay = relationship("Replay", backref="teams")
-    team_name_id = Column("Integer", ForeignKey("team_name.id"))
+    team_name_id = Column(Integer, ForeignKey("team_name.id"))
     team_name = relationship("Team_Name", backref="teams")
     place = Column(Integer)
     players = relationship("Player",
@@ -67,5 +67,5 @@ class Race(Base):
     name = Column(String)
     
 if __name__ == "__main__":
-    meta.create_all(engine)
+    Base.metadata.create_all(engine)
 
