@@ -24,32 +24,40 @@ def normalize_sc2_time(game_time):
 
 def identify_zvp(replay_list):
     zvp_replays = []
-    for replay in replay_list:
-        try:
+    try:
+        for replay in replay_list:
             if replay.player[1].play_race == "Protoss":
                 if replay.player[2].play_race == "Zerg":
-                    zvp_replays.append(replay)
+                    zvp_replays.append(replay.filename)
             elif replay.player[1].play_race == "Zerg":
                 if replay.player[2].play_race == "Protoss":
-                    zvp_replays.append(replay)
-        except:
-            pass
+                    zvp_replays.append(replay.filename)
+    except:
+        print("failed to display potential game: {}".format(replay))
+        pass
     return zvp_replays
 
 try:
-    path = os.path.normpath(cfg["replay_path"])
-    replays = sc2reader.load_replays(path, load_level=4)
-
-    zvp_replays = identify_zvp(replays)
-
-    for replay in zvp_replays:
+    path = cfg["replay_path"]
+    replays_to_try = os.listdir(path)
+    replays_that_worked = []
+    ## Warning, will delete replays that can't be opened
+    for file in replays_to_try:
         try:
-            print("Potential Cannon rush Game!: {} vs {}".format(replay.player[1], replay.player[2]))
+            replay = sc2reader.load_replay(os.path.join(path, file), load_level=2)
+            replays_that_worked.append(replay)
         except:
-            print("failed to display potential game")
-            pass
+            try:
+                print("Can't read.  Removing: {}".format(os.path.join(path, file)))
+                os.remove(os.path.join(path, file))
+            except Exception as err:
+                print(err)
 
-    for replay in zvp_replays:
+    zvp_replays = identify_zvp(replays_that_worked)
+    print("after identify_zvp: {}".format(zvp_replays))
+
+    for filename in zvp_replays:
+        replay = sc2reader.load_replay(filename, load_level=4)
         try:
             for event in replay.events:
                 if isinstance(event, sc2reader.events.tracker.UnitInitEvent) and event.unit_type_name == "Forge" and normalize_sc2_time(event.second) < 120:
@@ -61,6 +69,7 @@ try:
             pass
 
     print("finished finding cannon rushes!")
+    
 except Exception as err:
     print(err)
     pass
