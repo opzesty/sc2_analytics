@@ -56,6 +56,7 @@ try:
     zvp_replays = identify_zvp(replays_that_worked)
     print("after identify_zvp: {}".format(zvp_replays))
 
+    cannonRushNumber = 0
     for filename in zvp_replays:
         replay = sc2reader.load_replay(filename, load_level=4)
         try:
@@ -64,11 +65,14 @@ try:
                     print("Replay Name: {}".format(replay.filename))
                     print("Player1: {} vs Player2: {}".format(replay.player[1], replay.player[2]))
                     print("{}: {}".format(str(datetime.timedelta(seconds = normalize_sc2_time(event.second))), event.unit_type_name))
+                    cannonRushNumber += 1
         except:
             print("failed to display potential game")
             pass
 
     print("finished finding cannon rushes!")
+    print("Of the games searched, {}/{} were ZvPs.".format(len(zvp_replays), len(replays_that_worked)))
+    print("Of the ZvPs, {}/{} were likely cannon rushes.".format(cannonRushNumber, len(zvp_replays)))
     
 except Exception as err:
     print(err)
